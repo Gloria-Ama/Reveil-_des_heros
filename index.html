@@ -14,9 +14,39 @@
 <body>
   <div class="noise"></div>
 
+    <form name="presence" data-netlify="true" netlify-honeypot="bot-field" hidden>
+    <input type="text" name="nom" />
+    <input type="text" name="telephone" />
+    <input type="text" name="bot-field" />
+  </form>
+ 
+  <div id="presenceOverlay" class="presence-overlay">
+    <div class="presence-card">
+      <p class="presence-eyebrow">META INTIMACY</p>
+      <h2 class="presence-title">Réveil des Héros II</h2>
+      <p class="presence-text" data-i18n="presence.text">Avant d'entrer dans l'histoire, inscris-toi — on aimerait savoir qui est présent avec nous ce soir.</p>
+      <form id="presenceForm" name="presence" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="presence" />
+        <div style="display:none"><input name="bot-field" /></div>
+        <input type="text" id="presenceName" name="nom" data-i18n-placeholder="presence.name" placeholder="Ton nom complet" required autocomplete="name" />
+        <input type="tel" id="presencePhone" name="telephone" data-i18n-placeholder="presence.phone" placeholder="Ton numéro de téléphone" required autocomplete="tel" />
+        <button type="submit" id="presenceSubmit" data-i18n="presence.submit">TERMINER</button>
+      </form>
+      <p id="presenceError" class="presence-error"></p>
+      <div id="presenceSuccess" class="presence-success">
+        <p class="presence-success-title" data-i18n="presence.successTitle">Bienvenue dans l'histoire !</p>
+      </div>
+    </div>
+  </div>
+ 
   <header class="nav">
     <a class="brand" href="#top">META INTIMACY</a>
-    <a class="nav-link" href="#connect">Nous suivre</a>
+    <div class="nav-right">
+      <a class="nav-link" href="#connect" data-i18n="nav.follow">Nous suivre</a>
+      <button id="langToggle" class="lang-toggle" type="button" aria-label="Changer de langue">
+        <span class="lang-fr active">FR</span><span class="lang-sep">/</span><span class="lang-en">EN</span>
+      </button>
+    </div>
   </header>
 
   <main id="top">

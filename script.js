@@ -1,3 +1,263 @@
+// --- pop-up d'inscription de présence ---
+(function(){
+  const overlay = document.getElementById('presenceOverlay');
+  const form = document.getElementById('presenceForm');
+  const submitBtn = document.getElementById('presenceSubmit');
+  const errorEl = document.getElementById('presenceError');
+  const successEl = document.getElementById('presenceSuccess');
+  const ALREADY_KEY = 'meta_reveil_heros_2_presence_ok';
+
+  function encode(data) {
+    return Object.keys(data)
+      .map(k => encodeURIComponent(k) + '=' + encodeURIComponent(data[k]))
+      .join('&');
+  }
+
+  function closeOverlay() {
+    overlay.classList.add('closing');
+    document.body.classList.remove('presence-locked');
+    setTimeout(() => { overlay.classList.remove('open', 'closing'); }, 500);
+  }
+
+  function launchConfetti(duration) {
+    const container = document.createElement('div');
+    container.className = 'confetti-container';
+    document.body.appendChild(container);
+    const colors = ['#3ecf7a', '#F3EEE2', '#0f6b3a', '#E8E4D9', '#8fe3ab'];
+    const total = 90;
+    for (let i = 0; i < total; i++) {
+      const piece = document.createElement('span');
+      piece.className = 'confetti-piece';
+      const size = 6 + Math.random() * 8;
+      const isRound = Math.random() > 0.5;
+      piece.style.left = (Math.random() * 100) + 'vw';
+      piece.style.width = size + 'px';
+      piece.style.height = (isRound ? size : size * 1.6) + 'px';
+      piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+      piece.style.borderRadius = isRound ? '50%' : '2px';
+      const fallDuration = 2.4 + Math.random() * 1.1;
+      piece.style.animationDuration = fallDuration + 's';
+      piece.style.animationDelay = (Math.random() * 0.5) + 's';
+      container.appendChild(piece);
+    }
+    setTimeout(() => { container.remove(); }, duration + 600);
+  }
+
+  if (localStorage.getItem(ALREADY_KEY) === 'yes') {
+    overlay.classList.remove('open');
+  } else {
+    document.body.classList.add('presence-locked');
+    requestAnimationFrame(() => overlay.classList.add('open'));
+  }
+
+  form.addEventListener('submit', function(e){
+    e.preventDefault();
+    errorEl.textContent = '';
+    submitBtn.disabled = true;
+    submitBtn.textContent = (currentLang === 'en') ? 'SENDING...' : 'ENVOI...';
+
+    const formData = new FormData(form);
+    const payload = {};
+    formData.forEach((v, k) => { payload[k] = v; });
+
+    fetch('/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: encode(payload)
+    })
+    .then(() => {
+      localStorage.setItem(ALREADY_KEY, 'yes');
+      form.style.display = 'none';
+      successEl.classList.add('show');
+      launchConfetti(3000);
+      setTimeout(closeOverlay, 3000);
+    })
+    .catch(() => {
+      errorEl.textContent = (currentLang === 'en')
+        ? "Something went wrong. Try again or continue anyway."
+        : "Un problème est survenu. Réessaie ou continue quand même.";
+      submitBtn.disabled = false;
+      submitBtn.textContent = t('presence.submit');
+    });
+  });
+})();
+
+// --- traductions ---
+const translations = {
+  fr: {
+    'nav.follow': 'Nous suivre',
+    'presence.text': "Avant d'entrer dans l'histoire, inscris-toi — on aimerait savoir qui est présent avec nous ce soir.",
+    'presence.name': 'Ton nom complet',
+    'presence.phone': 'Ton numéro de téléphone',
+    'presence.submit': 'TERMINER',
+    'presence.successTitle': "Bienvenue dans l'histoire !",
+    'hero.eyebrow': 'META INTIMACY PRÉSENTE',
+    'hero.theme': 'Ces gens qui ont bouleversé le monde.',
+    'hero.meta1': '2e anniversaire',
+    'hero.meta2': '29 août 2026',
+    'hero.cta': "Découvrir l'histoire",
+    'who.number': '01 — QUI SOMMES-NOUS',
+    'who.title': 'Qui sommes-nous ?',
+    'who.c1.h': 'Une vision divine',
+    'who.c1.p': "Meta Intimacy est une cellule dynamique du ministère international Metamorphoo, implantée à Gatineau, au Canada, sous la responsabilité du Serviteur Joseph Levi Don, fils spirituel du Pasteur Paul André Don.",
+    'who.c2.h': 'Des débuts humbles',
+    'who.c2.p': "Née d'une vision portée dans le cœur de son responsable, Meta Intimacy a commencé humblement avec quelques croyants, d'abord en ligne puis en présentiel. Aujourd'hui, elle est devenue une véritable communauté spirituelle, un lieu d'adoration, de prière et d'enseignement où des vies sont transformées et des destinées restaurées.",
+    'who.c3.h': 'Notre identité',
+    'who.c3.p': "La particularité de Meta Intimacy réside dans son identité : une cellule qui met l'accent sur l'intimité avec Dieu, la communion avec le Saint-Esprit et la fraternité authentique. Les jeunes qui s'y retrouvent expérimentent non seulement la présence de Dieu, mais aussi une atmosphère familiale où chacun se sent accueilli et valorisé.",
+    'who.c4.h': 'Vie de communauté',
+    'who.c4.p': "Nous vivons des temps de prière, d'enseignements, de partage, de Bible Study Picnic et de Women's Night, rencontre entre les hommes, dans une atmosphère de communion et de fraternité.",
+    'who.place.label': 'Lieu',
+    'who.time.label': 'Rendez-vous',
+    'who.time.value': 'Tous les jeudis, dès 19h',
+    'who.leader1': 'Pasteur Paul André Don',
+    'who.leader2': 'Serviteur Joseph Levi Don',
+    'story.number': '02 — NOTRE HISTOIRE',
+    'story.title': 'Tout a commencé par une vision.',
+    'story.lead': 'Quelques personnes. Une même soif. Un désir de connaître Dieu plus profondément.',
+    'story.p': "Puis, rencontre après rencontre, prière après prière, une famille s'est construite. Meta Intimacy est devenue un espace de croissance, de transformation et d'impact.",
+    'story.quote1': "Deux ans plus tard, l'histoire continue.",
+    'story.quote2': 'Et cette fois, elle passe aussi par toi.',
+    'heroes.number': '03 — CEUX QUI ONT BOULEVERSÉ LE MONDE',
+    'heroes.statement': "ILS N'ÉTAIENT PAS<br><span>ORDINAIRES.</span>",
+    'heroes.esther': "Elle s'est levée pour un temps comme le sien.",
+    'heroes.david': "Personne ne l'attendait. Dieu, si.",
+    'heroes.paul': 'Une vie transformée, puis une génération marquée.',
+    'heroes.deborah': "Elle s'est levée lorsque son peuple avait besoin d'elle.",
+    'heroes.pierre': 'Imparfait, mais appelé à devenir un pilier.',
+    'heroes.common1': 'Leur point commun ?',
+    'heroes.common2': "Ils ont répondu à l'appel.",
+    'awaken.number': '04 — TON TOUR',
+    'awaken.small': 'UN HÉROS SOMMEILLE EN TOI.',
+    'awaken.title': "Et si le prochain héros…<br><span>c'était toi ?</span>",
+    'awaken.button': 'RÉVEILLER LE HÉROS',
+    'awaken.buttonAgain': 'UN AUTRE MESSAGE',
+    'awaken.default': 'Clique sur le bouton pour recevoir ton message.',
+    'legacy.number': '05 — LA TRACE',
+    'legacy.title': 'Dans quelques années,<br>qu\'est-ce qu\'on dira de ta génération ?',
+    'legacy.lead': "Les héros que nous célébrons aujourd'hui étaient autrefois des personnes ordinaires qui ont décidé de répondre à un appel extraordinaire.",
+    'legacy.line': "Ton histoire est peut-être en train de commencer.",
+    'about.title': 'Connaître Dieu. Grandir ensemble. Influencer notre génération.',
+    'about.p1': 'Prière', 'about.p2': 'Enseignement', 'about.p3': 'Communion', 'about.p4': 'Transformation', 'about.p5': 'Impact',
+    'connect.number': '07 — RESTONS CONNECTÉS',
+    'connect.title': "L'aventure ne s'arrête pas ici.",
+    'connect.text': 'Retrouve Meta Intimacy et découvre les prochaines rencontres.',
+    'connect.official': 'Site officiel',
+    'connect.reach': 'Nous joindre —',
+    'connect.feedback': 'Partager mon expérience',
+    'finale.thanks': "MERCI D'AVOIR FAIT PARTIE DE NOTRE HISTOIRE.",
+    'finale.text': 'Deux années. Des souvenirs. Des vies. Une histoire qui ne fait que commencer.',
+    'gallery.number': '08 — DEUX ANS EN IMAGES',
+    'gallery.title': 'Une histoire faite de visages, de moments et de vies touchées.'
+  },
+  en: {
+    'nav.follow': 'Follow us',
+    'presence.text': "Before stepping into the story, sign in — we'd love to know who's here with us tonight.",
+    'presence.name': 'Your full name',
+    'presence.phone': 'Your phone number',
+    'presence.submit': 'DONE',
+    'presence.successTitle': 'Welcome to the story!',
+    'hero.eyebrow': 'META INTIMACY PRESENTS',
+    'hero.theme': 'The people who changed the world.',
+    'hero.meta1': '2nd anniversary',
+    'hero.meta2': 'August 29, 2026',
+    'hero.cta': 'Discover the story',
+    'who.number': '01 — WHO WE ARE',
+    'who.title': 'Who are we?',
+    'who.c1.h': 'A God-given vision',
+    'who.c1.p': "Meta Intimacy is a dynamic cell of the international Metamorphoo ministry, based in Gatineau, Canada, under the leadership of Servant Joseph Levi Don, spiritual son of Pastor Paul André Don.",
+    'who.c2.h': 'Humble beginnings',
+    'who.c2.p': "Born from a vision carried in the heart of its leader, Meta Intimacy began humbly with a few believers, first online and then in person. Today, it has become a true spiritual community, a place of worship, prayer and teaching where lives are transformed and destinies restored.",
+    'who.c3.h': 'Our identity',
+    'who.c3.p': "What makes Meta Intimacy unique is its identity: a cell that emphasizes intimacy with God, communion with the Holy Spirit and genuine fellowship. The young people who gather here experience not only the presence of God, but also a family atmosphere where everyone feels welcomed and valued.",
+    'who.c4.h': 'Community life',
+    'who.c4.p': "We share times of prayer, teaching, fellowship, Bible Study Picnics and Women's Nights, gatherings between the men, in an atmosphere of communion and fellowship.",
+    'who.place.label': 'Location',
+    'who.time.label': 'Meet us',
+    'who.time.value': 'Every Thursday, from 7pm',
+    'who.leader1': 'Pastor Paul André Don',
+    'who.leader2': 'Servant Joseph Levi Don',
+    'story.number': '02 — OUR STORY',
+    'story.title': 'It all began with a vision.',
+    'story.lead': 'A few people. One shared hunger. A desire to know God more deeply.',
+    'story.p': "Then, gathering after gathering, prayer after prayer, a family was built. Meta Intimacy became a space for growth, transformation and impact.",
+    'story.quote1': 'Two years later, the story continues.',
+    'story.quote2': 'And this time, it runs through you too.',
+    'heroes.number': '03 — THOSE WHO CHANGED THE WORLD',
+    'heroes.statement': "THEY WERE NOT<br><span>ORDINARY.</span>",
+    'heroes.esther': 'She rose up for a time such as this.',
+    'heroes.david': 'No one expected him. God did.',
+    'heroes.paul': 'A transformed life, then a generation marked forever.',
+    'heroes.deborah': 'She rose up when her people needed her.',
+    'heroes.pierre': 'Imperfect, yet called to become a pillar.',
+    'heroes.common1': 'What did they have in common?',
+    'heroes.common2': 'They answered the call.',
+    'awaken.number': '04 — YOUR TURN',
+    'awaken.small': 'A HERO SLEEPS WITHIN YOU.',
+    'awaken.title': "What if the next hero…<br><span>was you?</span>",
+    'awaken.button': 'AWAKEN THE HERO',
+    'awaken.buttonAgain': 'ANOTHER MESSAGE',
+    'awaken.default': 'Click the button to receive your message.',
+    'legacy.number': '05 — THE MARK YOU LEAVE',
+    'legacy.title': 'In a few years,<br>what will they say about your generation?',
+    'legacy.lead': 'The heroes we celebrate today were once ordinary people who decided to answer an extraordinary call.',
+    'legacy.line': 'Your story might just be beginning.',
+    'about.title': 'Know God. Grow together. Influence our generation.',
+    'about.p1': 'Prayer', 'about.p2': 'Teaching', 'about.p3': 'Fellowship', 'about.p4': 'Transformation', 'about.p5': 'Impact',
+    'connect.number': '07 — STAY CONNECTED',
+    'connect.title': "The journey doesn't stop here.",
+    'connect.text': 'Find Meta Intimacy and discover upcoming gatherings.',
+    'connect.official': 'Official website',
+    'connect.reach': 'Contact us —',
+    'connect.feedback': 'Share my experience',
+    'finale.thanks': 'THANK YOU FOR BEING PART OF OUR STORY.',
+    'finale.text': "Two years. Memories. Lives changed. A story that's only just begun.",
+    'gallery.number': '08 — TWO YEARS IN PICTURES',
+    'gallery.title': 'A story made of faces, moments, and lives touched.'
+  }
+};
+
+let currentLang = localStorage.getItem('meta_lang') || 'fr';
+
+function t(key){
+  return (translations[currentLang] && translations[currentLang][key]) || key;
+}
+
+function applyLanguage(lang){
+  currentLang = lang;
+  localStorage.setItem('meta_lang', lang);
+  document.documentElement.lang = lang;
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (translations[lang][key] !== undefined) el.textContent = translations[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-html]').forEach(el => {
+    const key = el.getAttribute('data-i18n-html');
+    if (translations[lang][key] !== undefined) el.innerHTML = translations[lang][key];
+  });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (translations[lang][key] !== undefined) el.setAttribute('placeholder', translations[lang][key]);
+  });
+
+  const toggle = document.getElementById('langToggle');
+  toggle.querySelector('.lang-fr').classList.toggle('active', lang === 'fr');
+  toggle.querySelector('.lang-en').classList.toggle('active', lang === 'en');
+
+  // reset awaken button/message to translated defaults if not showing a random message yet
+  const awakenBtn = document.getElementById('awakenBtn');
+  if (awakenBtn && !awakenBtn.dataset.clicked) {
+    awakenBtn.textContent = t('awaken.button');
+  }
+}
+
+document.getElementById('langToggle').addEventListener('click', () => {
+  applyLanguage(currentLang === 'fr' ? 'en' : 'fr');
+});
+
+applyLanguage(currentLang);
+
+// --- scroll reveal ---
 const reveals = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
@@ -9,28 +269,85 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.14 });
 reveals.forEach((el) => observer.observe(el));
 
-const messages = [
-  "Tu as été appelé pour un temps comme celui-ci.",
-  "Ce que Dieu a placé en toi doit servir à ta génération.",
-  "N'attends pas d'être parfait pour répondre à l'appel.",
-  "Ton obéissance d'aujourd'hui peut changer l'histoire de quelqu'un demain.",
-  "Le monde n'a pas besoin d'une copie. Il a besoin de ce que Dieu a placé en toi.",
-  "Commence là où tu es, avec ce que tu as.",
-  "Les héros ne sont pas ceux qui n'ont jamais peur, mais ceux qui avancent malgré la peur.",
-  "Ta génération a besoin de ta voix, de ta foi et de ton courage.",
-  "Dieu peut utiliser une vie disponible pour accomplir bien plus qu'elle ne l'imagine.",
-  "Ton histoire n'est pas trop petite pour avoir un impact éternel."
-];
+// --- messages "réveiller le héros" (bilingue) ---
+const messages = {
+  fr: [
+    "Tu n'es pas ici par hasard. Ta génération a besoin de ce que Dieu a déposé en toi.",
+    "Le monde n'a pas encore vu tout ce que Dieu peut accomplir à travers toi.",
+    "Tu n'as pas besoin d'être connu pour avoir de l'impact. Commence là où tu es.",
+    "Ce que tu considères comme petit aujourd'hui peut bouleverser une génération demain.",
+    "Il est temps de réveiller ce que tu as laissé dormir en toi.",
+    "Ton histoire ne s'arrête pas à ce que tu as vécu. Il reste encore des pages à écrire.",
+    "Dieu ne cherche pas seulement des personnes capables. Il cherche des personnes disponibles.",
+    "Peut-être que tu attends ton moment. Peut-être que ton moment t'attend déjà.",
+    "Il y a des personnes que toi seul peux atteindre.",
+    "Ne sous-estime jamais l'impact d'un OUI donné à Dieu.",
+    "Les héros ne commencent pas toujours avec de grandes choses. Ils commencent souvent par un simple oui.",
+    "Tu n'as pas été créé uniquement pour exister. Tu as été créé pour laisser une trace.",
+    "Quelque chose en toi doit servir à cette génération.",
+    "Ton passé peut expliquer certaines choses, mais il ne décide pas de ta destination.",
+    "Là où les autres voient tes limites, Dieu voit encore des possibilités.",
+    "N'attends pas de te sentir prêt pour commencer à devenir celui que Dieu t'appelle à être.",
+    "Une génération pourrait être différente simplement parce que tu as décidé de te lever.",
+    "Le prochain chapitre de ton histoire pourrait commencer par une décision prise aujourd'hui.",
+    "Ce que Dieu commence avec une personne peut finir par toucher des milliers de vies.",
+    "Tu peux être la réponse à une prière que quelqu'un fait en ce moment.",
+    "Le monde se souvient de ceux qui ont osé se lever lorsque rester assis était plus facile.",
+    "Ton don n'est pas seulement pour toi. Quelqu'un attend ce que tu portes.",
+    "Tu n'as peut-être pas toutes les réponses. Avance quand même.",
+    "Tu n'es peut-être pas encore là où tu veux être, mais ton histoire est loin d'être terminée.",
+    "Les héros d'hier ont écrit leur histoire. À toi d'écrire la tienne.",
+    "Esther avait son époque. David avait son combat. Paul avait sa mission. Et toi, qu'est-ce que Dieu t'a confié ?",
+    "Il y a un avant et un après lorsqu'une personne décide réellement de répondre à son appel.",
+    "Ne cherche pas seulement à réussir ta vie. Cherche à ce que ta vie compte.",
+    "Certains bouleversent le monde devant des milliers de personnes. D'autres changent le monde d'une seule personne. Les deux comptent.",
+    "Un jour, quelqu'un pourrait raconter ton histoire pour trouver le courage de commencer la sienne."
+  ],
+  en: [
+    "You are not here by accident. Your generation needs what God has placed in you.",
+    "The world hasn't yet seen all that God can do through you.",
+    "You don't need to be known to have an impact. Start where you are.",
+    "What you see as small today can shake a generation tomorrow.",
+    "It's time to awaken what you've let sleep inside you.",
+    "Your story doesn't end with what you've been through. There are still pages left to write.",
+    "God isn't only looking for capable people. He's looking for available ones.",
+    "Maybe you're waiting for your moment. Maybe your moment is already waiting for you.",
+    "There are people only you can reach.",
+    "Never underestimate the impact of a YES given to God.",
+    "Heroes don't always start with great things. They often start with a simple yes.",
+    "You weren't created just to exist. You were created to leave a mark.",
+    "Something in you is meant to serve this generation.",
+    "Your past may explain some things, but it doesn't decide your destination.",
+    "Where others see your limits, God still sees possibilities.",
+    "Don't wait to feel ready to start becoming who God is calling you to be.",
+    "A generation could be different simply because you decided to rise up.",
+    "The next chapter of your story could begin with a decision made today.",
+    "What God begins with one person can end up touching thousands of lives.",
+    "You could be the answer to a prayer someone is praying right now.",
+    "The world remembers those who dared to rise when staying seated was easier.",
+    "Your gift isn't just for you. Someone is waiting for what you carry.",
+    "You may not have all the answers. Move forward anyway.",
+    "You may not be where you want to be yet, but your story is far from over.",
+    "Yesterday's heroes wrote their story. It's your turn to write yours.",
+    "Esther had her time. David had his battle. Paul had his mission. And you — what has God entrusted to you?",
+    "There's a before and an after when someone truly decides to answer their calling.",
+    "Don't just seek to succeed in life. Seek to make your life count.",
+    "Some shake the world in front of thousands. Others change the world of a single person. Both matter.",
+    "One day, someone might tell your story to find the courage to start their own."
+  ]
+};
 
 const btn = document.getElementById('awakenBtn');
 const box = document.getElementById('messageBox');
 const text = document.getElementById('messageText');
 
 btn.addEventListener('click', () => {
-  const message = messages[Math.floor(Math.random() * messages.length)];
+  const list = messages[currentLang];
+  const message = list[Math.floor(Math.random() * list.length)];
   text.textContent = message;
   box.classList.remove('flash');
   void box.offsetWidth;
   box.classList.add('flash');
-  btn.textContent = 'UN AUTRE MESSAGE';
+  btn.textContent = t('awaken.buttonAgain');
+  btn.dataset.clicked = 'true';
 });

@@ -13,7 +13,40 @@ body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui
 a{color:inherit;text-decoration:none}
 img{display:block;width:100%;height:100%;object-fit:cover}
 .noise{position:fixed;inset:0;pointer-events:none;opacity:.05;z-index:50;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.65'/%3E%3C/svg%3E")}
+
+.presence-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:22px;background:rgba(5,9,6,.88);backdrop-filter:blur(6px);opacity:0;visibility:hidden;transition:opacity .5s ease}
+.presence-overlay.open{opacity:1;visibility:visible}
+.presence-overlay.closing{opacity:0}
+.presence-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:44px 34px;text-align:center;transform:translateY(16px);transition:transform .5s ease;box-shadow:0 40px 90px rgba(0,0,0,.5)}
+.presence-overlay.open .presence-card{transform:translateY(0)}
+.presence-eyebrow{font-size:11px;letter-spacing:.28em;color:var(--gold);margin:0 0 14px}
+.presence-title{font-family:"Cormorant Garamond",serif;font-size:34px;margin:0 0 16px;color:var(--text)}
+.presence-text{font-size:14.5px;color:var(--muted);line-height:1.7;margin:0 0 30px}
+#presenceForm{display:flex;flex-direction:column;gap:14px}
+#presenceForm input[type="text"],#presenceForm input[type="tel"]{width:100%;padding:15px 18px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;font-family:Inter,sans-serif}
+#presenceForm input[type="text"]:focus,#presenceForm input[type="tel"]:focus{outline:none;border-color:var(--gold)}
+#presenceForm input::placeholder{color:var(--muted)}
+#presenceSubmit{border:0;border-radius:999px;padding:16px 22px;background:var(--gold);color:#07160e;font-weight:700;letter-spacing:.08em;font-size:13px;cursor:pointer;transition:.25s}
+#presenceSubmit:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(62,207,122,.3)}
+#presenceSubmit:disabled{opacity:.6;cursor:default;transform:none}
+.presence-error{margin-top:14px;font-size:13px;color:#e08a6a;min-height:1em}
+.presence-success{display:none;padding:20px 0}
+.presence-success.show{display:block}
+.presence-success-title{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:26px;color:var(--gold)}
+body.presence-locked{overflow:hidden}
+.confetti-container{position:fixed;inset:0;z-index:200;pointer-events:none;overflow:hidden}
+.confetti-piece{position:absolute;top:-5%;border-radius:2px;opacity:.95;animation:confettiFall linear forwards}
+@keyframes confettiFall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1}
+  85%{opacity:1}
+  100%{transform:translateY(112vh) rotate(600deg);opacity:.3}
+}
 .nav{position:fixed;top:0;left:0;right:0;z-index:30;display:flex;justify-content:space-between;align-items:center;padding:22px 5vw;background:linear-gradient(to bottom,rgba(10,18,13,.9),transparent);font-size:12px;letter-spacing:.14em}.brand{font-weight:600}.nav-link{color:var(--muted)}
+.nav-right{display:flex;align-items:center;gap:22px}
+.lang-toggle{background:none;border:1px solid var(--line);border-radius:999px;padding:6px 12px;cursor:pointer;font-size:11px;letter-spacing:.08em;color:var(--muted);display:flex;align-items:center;gap:5px;font-family:Inter,sans-serif}
+.lang-toggle:hover{border-color:var(--gold)}
+.lang-toggle .lang-sep{color:var(--line)}
+.lang-toggle .active{color:var(--gold);font-weight:600}
 .section{position:relative;padding:120px 6vw}.narrow{max-width:1100px;margin:auto}.section-number{font-size:11px;letter-spacing:.22em;color:var(--gold);margin-bottom:28px}.display{font-family:"Cormorant Garamond",serif;font-size:clamp(42px,7vw,86px);line-height:.98;margin:0 0 40px;font-weight:600}.lead{font-size:clamp(20px,2.7vw,34px);line-height:1.35}
 
 .hero{min-height:100svh;display:grid;place-items:center;text-align:center;overflow:hidden}
