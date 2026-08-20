@@ -19,12 +19,13 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 .presence-overlay.closing{opacity:0}
 .presence-card{width:100%;max-width:420px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:44px 34px;text-align:center;transform:translateY(16px);transition:transform .5s ease;box-shadow:0 40px 90px rgba(0,0,0,.5)}
 .presence-overlay.open .presence-card{transform:translateY(0)}
-.presence-eyebrow{font-size:11px;letter-spacing:.28em;color:var(--gold);margin:0 0 14px}
-.presence-title{font-family:"Cormorant Garamond",serif;font-size:34px;margin:0 0 16px;color:var(--text)}
+.presence-eyebrow{font-size:15px;letter-spacing:.02em;color:var(--gold);margin:0 0 10px;font-family:"Cormorant Garamond",serif;font-weight:600}
+.presence-theme{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:17px;color:var(--muted);margin:0 0 14px}
 .presence-text{font-size:14.5px;color:var(--muted);line-height:1.7;margin:0 0 30px}
+.presence-success-name{font-family:"Cormorant Garamond",serif;font-size:30px;color:var(--text);margin:0 0 10px}
 #presenceForm{display:flex;flex-direction:column;gap:14px}
-#presenceForm input[type="text"],#presenceForm input[type="tel"]{width:100%;padding:15px 18px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;font-family:Inter,sans-serif}
-#presenceForm input[type="text"]:focus,#presenceForm input[type="tel"]:focus{outline:none;border-color:var(--gold)}
+#presenceForm input[type="text"],#presenceForm input[type="tel"],#presenceForm input[type="email"]{width:100%;padding:15px 18px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;font-family:Inter,sans-serif}
+#presenceForm input[type="text"]:focus,#presenceForm input[type="tel"]:focus,#presenceForm input[type="email"]:focus{outline:none;border-color:var(--gold)}
 #presenceForm input::placeholder{color:var(--muted)}
 #presenceSubmit{border:0;border-radius:999px;padding:16px 22px;background:var(--gold);color:#07160e;font-weight:700;letter-spacing:.08em;font-size:13px;cursor:pointer;transition:.25s}
 #presenceSubmit:hover{transform:translateY(-1px);box-shadow:0 12px 30px rgba(62,207,122,.3)}

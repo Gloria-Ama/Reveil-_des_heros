@@ -17,24 +17,27 @@
   <form name="presence" data-netlify="true" netlify-honeypot="bot-field" hidden>
     <input type="text" name="nom" />
     <input type="text" name="telephone" />
+    <input type="email" name="courriel" />
     <input type="text" name="bot-field" />
   </form>
 
   <div id="presenceOverlay" class="presence-overlay">
     <div class="presence-card">
-      <p class="presence-eyebrow">META INTIMACY</p>
-      <h2 class="presence-title">Réveil des Héros II</h2>
-      <p class="presence-text" data-i18n="presence.text">Avant d'entrer dans l'histoire, inscris-toi — on aimerait savoir qui est présent avec nous ce soir.</p>
+      <p class="presence-eyebrow" data-i18n="presence.eyebrow">Bienvenue à Réveil des Héros II ✨</p>
+      <p class="presence-theme" data-i18n="presence.theme">Ces gens qui ont bouleversé le monde.</p>
+      <p class="presence-text" data-i18n="presence.text">Inscris-toi pour entrer dans l'expérience.</p>
       <form id="presenceForm" name="presence" method="POST" data-netlify="true" netlify-honeypot="bot-field">
         <input type="hidden" name="form-name" value="presence" />
         <div style="display:none"><input name="bot-field" /></div>
-        <input type="text" id="presenceName" name="nom" data-i18n-placeholder="presence.name" placeholder="Ton nom complet" required autocomplete="name" />
-        <input type="tel" id="presencePhone" name="telephone" data-i18n-placeholder="presence.phone" placeholder="Ton numéro de téléphone" required autocomplete="tel" />
-        <button type="submit" id="presenceSubmit" data-i18n="presence.submit">TERMINER</button>
+        <input type="text" id="presenceName" name="nom" data-i18n-placeholder="presence.name" placeholder="Nom complet *" required autocomplete="name" />
+        <input type="tel" id="presencePhone" name="telephone" data-i18n-placeholder="presence.phone" placeholder="Numéro de téléphone *" required autocomplete="tel" />
+        <input type="email" id="presenceEmail" name="courriel" data-i18n-placeholder="presence.email" placeholder="Adresse courriel — facultatif" autocomplete="email" />
+        <button type="submit" id="presenceSubmit" data-i18n="presence.submit">ENTRER DANS L'EXPÉRIENCE →</button>
       </form>
       <p id="presenceError" class="presence-error"></p>
       <div id="presenceSuccess" class="presence-success">
-        <p class="presence-success-title" data-i18n="presence.successTitle">Bienvenue dans l'histoire !</p>
+        <p class="presence-success-name" id="presenceSuccessName">Bienvenue, Gloria.</p>
+        <p class="presence-success-title" data-i18n="presence.successTitle">Le héros en toi est sur le point de se réveiller.</p>
       </div>
     </div>
   </div>
@@ -126,7 +129,7 @@
     <section class="heroes section">
       <div class="narrow">
         <p class="section-number reveal" data-i18n="heroes.number">02 — CEUX QUI ONT BOULEVERSÉ LE MONDE</p>
-        <h2 class="big-statement reveal" data-i18n-html="heroes.statement">ILS N'ÉTAIENT PAS<br><span>EXTRAORDINAIRES.</span></h2>
+        <h2 class="big-statement reveal" data-i18n-html="heroes.statement">ILS N'ÉTAIENT PAS<br><span>ORDINAIRES.</span></h2>
       </div>
       <div class="hero-list narrow">
         <article class="biblical-hero reveal"><span data-i18n="heroes.name.esther">ESTHER</span><p data-i18n="heroes.esther">Elle s'est levée pour un temps comme le sien.</p></article>
@@ -210,6 +213,8 @@
     <p>Meta Intimacy — Réveil des Héros II</p>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
   <script src="translations.js"></script>
   <script src="script.js"></script>
 </body>

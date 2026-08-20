@@ -47,10 +47,12 @@ setTimeout(() => launchConfetti(3000), 250);
     setTimeout(() => { overlay.classList.remove('open', 'closing'); }, 500);
   }
 
-  function celebrateAndClose() {
+  function celebrateAndClose(firstName) {
     localStorage.setItem(ALREADY_KEY, 'yes');
     form.style.display = 'none';
     errorEl.textContent = '';
+    const nameEl = document.getElementById('presenceSuccessName');
+    nameEl.textContent = t('presence.welcomeName').replace('{name}', firstName);
     successEl.classList.add('show');
     launchConfetti(3000);
     setTimeout(closeOverlay, 3000);
@@ -63,23 +65,32 @@ setTimeout(() => launchConfetti(3000), 250);
     requestAnimationFrame(() => overlay.classList.add('open'));
   }
 
-  form.addEventListener('submit', function(e){
+  form.addEventListener('submit', async function(e){
     e.preventDefault();
     errorEl.textContent = '';
     submitBtn.disabled = true;
     submitBtn.textContent = (currentLang === 'en') ? 'SENDING...' : 'ENVOI...';
 
-    const formData = new FormData(form);
-    const payload = {};
-    formData.forEach((v, k) => { payload[k] = v; });
+    const nom = document.getElementById('presenceName').value.trim();
+    const telephone = document.getElementById('presencePhone').value.trim();
+    const courriel = document.getElementById('presenceEmail').value.trim();
+    const firstName = nom.split(' ')[0] || nom;
+
+    // Priorité à Supabase (base de données réelle) ; repli sur Netlify Forms
+    // tant que Supabase n'est pas encore connecté (voir supabase-client.js).
+    if (typeof registerParticipant === 'function' && window.supabase) {
+      await registerParticipant({ nom, telephone, courriel });
+      celebrateAndClose(firstName);
+      return;
+    }
 
     fetch('/', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: encode(payload)
+      body: encode({ 'form-name': 'presence', nom, telephone, courriel })
     })
-    .then(celebrateAndClose)
-    .catch(celebrateAndClose); // même hors ligne / en local, on laisse entrer et on célèbre
+    .then(() => celebrateAndClose(firstName))
+    .catch(() => celebrateAndClose(firstName)); // même hors ligne, on laisse entrer et on célèbre
   });
 })();
 
