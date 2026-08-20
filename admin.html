@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Admin — Réveil des Héros II</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a120d; --surface:#101c14; --text:#f4efe5; --muted:#a7b2a4;
+  --gold:#3ecf7a; --line:rgba(255,255,255,.10);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;min-height:100vh}
+
+/* --- login screen --- */
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:44px 34px;text-align:center}
+.login-card h1{font-family:"Cormorant Garamond",serif;font-size:28px;margin:0 0 8px}
+.login-card p{color:var(--muted);font-size:13.5px;margin:0 0 28px}
+.login-card input{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;margin-bottom:14px}
+.login-card input:focus{outline:none;border-color:var(--gold)}
+.login-card button{width:100%;border:0;border-radius:999px;padding:14px;background:var(--gold);color:#07160e;font-weight:700;letter-spacing:.05em;font-size:13px;cursor:pointer}
+.login-card button:disabled{opacity:.6;cursor:default}
+.login-error{color:#e08a6a;font-size:13px;margin-top:14px;min-height:1em}
+
+/* --- dashboard --- */
+.dashboard{display:none;max-width:1100px;margin:0 auto;padding:40px 24px 80px}
+.dashboard.show{display:block}
+.dash-header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:12px;margin-bottom:32px}
+.dash-header h1{font-family:"Cormorant Garamond",serif;font-size:32px;margin:0}
+.dash-header .sub{color:var(--muted);font-size:13px}
+.logout-btn{background:none;border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:8px 16px;font-size:12px;cursor:pointer}
+.logout-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:32px}
+.stat-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.stat-card .num{font-family:"Cormorant Garamond",serif;font-size:36px;color:var(--gold)}
+.stat-card .label{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+
+.toolbar{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.toolbar input{flex:1;min-width:200px;padding:12px 16px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-size:14px}
+.toolbar input:focus{outline:none;border-color:var(--gold)}
+.export-btn{background:var(--gold);color:#07160e;border:0;border-radius:10px;padding:12px 20px;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+
+table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:14px;overflow:hidden}
+th,td{text-align:left;padding:12px 16px;border-bottom:1px solid var(--line);font-size:13.5px}
+th{color:var(--gold);font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:600}
+tr:last-child td{border-bottom:none}
+td.muted{color:var(--muted)}
+.empty-state{text-align:center;color:var(--muted);padding:40px;font-size:14px}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <h1>Accès administrateur</h1>
+    <p>Réveil des Héros II — liste des inscriptions</p>
+    <input type="password" id="adminPassword" placeholder="Mot de passe" autocomplete="current-password" />
+    <button id="loginBtn">SE CONNECTER</button>
+    <p id="loginError" class="login-error"></p>
+  </div>
+</div>
+
+<div id="dashboard" class="dashboard">
+  <div class="dash-header">
+    <div>
+      <h1>Réveil des Héros II</h1>
+      <p class="sub">Tableau de bord des inscriptions</p>
+    </div>
+    <button class="logout-btn" id="logoutBtn">Se déconnecter</button>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="num" id="statTotal">—</div><div class="label">Inscrits</div></div>
+    <div class="stat-card"><div class="num" id="statPhone">—</div><div class="label">Téléphone fourni</div></div>
+    <div class="stat-card"><div class="num" id="statEmail">—</div><div class="label">Courriel fourni</div></div>
+    <div class="stat-card"><div class="num" id="statToday">—</div><div class="label">Aujourd'hui</div></div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="searchInput" placeholder="Rechercher un nom, téléphone ou courriel..." />
+    <button class="export-btn" id="exportBtn">Exporter en CSV</button>
+  </div>
+
+  <div id="tableWrap">
+    <table>
+      <thead>
+        <tr><th>Nom</th><th>Téléphone</th><th>Courriel</th><th>Date</th><th>Heure</th></tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <p id="emptyState" class="empty-state" style="display:none">Aucune inscription pour l'instant.</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://fijmqryjryrxbuabxwpg.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xu3d9A1CP1xtftiUzHCLxg_NnAJ5pWI";
+const ADMIN_EMAIL = "admin@reveildesheros2.com";
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allParticipants = [];
+
+const loginScreen = document.getElementById('loginScreen');
+const dashboard = document.getElementById('dashboard');
+const loginBtn = document.getElementById('loginBtn');
+const loginError = document.getElementById('loginError');
+const passwordInput = document.getElementById('adminPassword');
+
+async function attemptLogin() {
+  const password = passwordInput.value;
+  if (!password) return;
+  loginBtn.disabled = true;
+  loginBtn.textContent = 'CONNEXION...';
+  loginError.textContent = '';
+
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email: ADMIN_EMAIL,
+    password: password
+  });
+
+  if (error) {
+    loginError.textContent = "Mot de passe incorrect.";
+    loginBtn.disabled = false;
+    loginBtn.textContent = 'SE CONNECTER';
+    return;
+  }
+
+  loginScreen.style.display = 'none';
+  dashboard.classList.add('show');
+  loadParticipants();
+}
+
+loginBtn.addEventListener('click', attemptLogin);
+passwordInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') attemptLogin(); });
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await supabaseClient.auth.signOut();
+  location.reload();
+});
+
+async function loadParticipants() {
+  const { data, error } = await supabaseClient
+    .from('participants')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    document.getElementById('tableBody').innerHTML = '';
+    document.getElementById('emptyState').style.display = 'block';
+    document.getElementById('emptyState').textContent = "Erreur de chargement : " + error.message;
+    return;
+  }
+
+  allParticipants = data || [];
+  renderStats(allParticipants);
+  renderTable(allParticipants);
+}
+
+function renderStats(list) {
+  const today = new Date().toDateString();
+  document.getElementById('statTotal').textContent = list.length;
+  document.getElementById('statPhone').textContent = list.filter(p => p.telephone).length;
+  document.getElementById('statEmail').textContent = list.filter(p => p.email).length;
+  document.getElementById('statToday').textContent = list.filter(p => new Date(p.created_at).toDateString() === today).length;
+}
+
+function renderTable(list) {
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  tbody.innerHTML = '';
+
+  if (list.length === 0) {
+    empty.style.display = 'block';
+    empty.textContent = 'Aucune inscription pour l\'instant.';
+    return;
+  }
+  empty.style.display = 'none';
+
+  list.forEach(p => {
+    const d = new Date(p.created_at);
+    const dateStr = d.toLocaleDateString('fr-CA');
+    const timeStr = d.toLocaleTimeString('fr-CA', { hour: '2-digit', minute: '2-digit' });
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${escapeHtml(p.nom)}</td>
+      <td>${escapeHtml(p.telephone)}</td>
+      <td class="muted">${escapeHtml(p.email || '—')}</td>
+      <td>${dateStr}</td>
+      <td>${timeStr}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : str;
+  return div.innerHTML;
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  const q = e.target.value.toLowerCase().trim();
+  const filtered = allParticipants.filter(p =>
+    (p.nom || '').toLowerCase().includes(q) ||
+    (p.telephone || '').toLowerCase().includes(q) ||
+    (p.email || '').toLowerCase().includes(q)
+  );
+  renderTable(filtered);
+});
+
+document.getElementById('exportBtn').addEventListener('click', () => {
+  const rows = [['Nom', 'Téléphone', 'Courriel', 'Date d\'inscription']];
+  allParticipants.forEach(p => {
+    rows.push([p.nom, p.telephone, p.email || '', new Date(p.created_at).toLocaleString('fr-CA')]);
+  });
+  const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'reveil-des-heros-2-participants.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// si déjà connecté (session existante), sauter direct au dashboard
+supabaseClient.auth.getSession().then(({ data }) => {
+  if (data.session) {
+    loginScreen.style.display = 'none';
+    dashboard.classList.add('show');
+    loadParticipants();
+  }
+});
+</script>
+</body>
+</html>
