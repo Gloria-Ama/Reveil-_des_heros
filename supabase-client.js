@@ -14,6 +14,14 @@ const supabaseClient = (SUPABASE_URL.startsWith("http"))
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
+// Normalise un numéro de téléphone vers un format constant (10 chiffres, sans espaces/tirets)
+// pour que les doublons soient bien détectés peu importe comment la personne l'a tapé.
+function normalizePhoneForStorage(raw) {
+  let digits = (raw || "").replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
+  return digits;
+}
+
 // Enregistre un participant. Retourne { ok: true } si succès,
 // { ok: true, duplicate: true } si ce numéro existe déjà (pas bloquant),
 // { ok: false } si la base de données n'est pas encore connectée ou en cas d'erreur réseau.
@@ -22,9 +30,10 @@ async function registerParticipant({ nom, telephone, courriel }) {
     console.warn("Supabase n'est pas encore configuré (voir supabase-client.js).");
     return { ok: false };
   }
+  const telephoneNormalise = normalizePhoneForStorage(telephone);
   try {
     const { error } = await supabaseClient.from("participants").insert([
-      { nom, telephone, email: courriel || null, consentement: true }
+      { nom, telephone: telephoneNormalise, email: courriel || null, consentement: true }
     ]);
     if (error) {
       // code 23505 = violation de contrainte unique -> ce téléphone est déjà inscrit
