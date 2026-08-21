@@ -51,6 +51,14 @@ th{color:var(--gold);font-size:11px;letter-spacing:.06em;text-transform:uppercas
 tr:last-child td{border-bottom:none}
 td.muted{color:var(--muted)}
 .empty-state{text-align:center;color:var(--muted);padding:40px;font-size:14px}
+
+.sms-panel{margin-top:36px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:28px}
+.sms-panel h2{font-family:"Cormorant Garamond",serif;font-size:22px;margin:0 0 8px}
+.sms-hint{color:var(--muted);font-size:12.5px;margin:0 0 16px}
+.sms-hint code{background:var(--bg);padding:2px 6px;border-radius:4px;color:var(--gold)}
+.sms-panel textarea{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:14px;font-family:Inter,sans-serif;resize:vertical;margin-bottom:14px}
+.sms-panel textarea:focus{outline:none;border-color:var(--gold)}
+.sms-status{margin-top:14px;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -95,13 +103,23 @@ td.muted{color:var(--muted)}
     </table>
     <p id="emptyState" class="empty-state" style="display:none">Aucune inscription pour l'instant.</p>
   </div>
+
+  <div class="sms-panel">
+    <h2>Envoyer un SMS groupé</h2>
+    <p class="sms-hint">Utilise <code>{nom}</code> dans ton message pour insérer automatiquement le prénom de chaque personne. Pour une vidéo, mets le lien directement dans le texte (YouTube, Google Drive, etc.).</p>
+    <textarea id="smsMessage" rows="4" placeholder="Ex : Bonjour {nom} ! Merci d'avoir été présent à Réveil des Héros II... Revis la soirée en vidéo ici : [lien]"></textarea>
+    <p class="sms-hint" style="margin-top:18px">Photos à joindre (facultatif) — une URL d'image publique par ligne, 10 maximum :</p>
+    <textarea id="smsMediaUrls" rows="3" placeholder="https://exemple.com/photo1.jpg&#10;https://exemple.com/photo2.jpg"></textarea>
+    <button id="sendSmsBtn" class="export-btn">Envoyer à tous les participants</button>
+    <p id="smsStatus" class="sms-status"></p>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://fijmqryjryrxbuabxwpg.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_Xu3d9A1CP1xtftiUzHCLxg_NnAJ5pWI";
-const ADMIN_EMAIL = "admin@reveildesheros2.com";
+const ADMIN_EMAIL = "draforamagloria@gmail.com";
 
 const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -126,7 +144,7 @@ async function attemptLogin() {
   });
 
   if (error) {
-    loginError.textContent = "Mot de passe incorrect.";
+    loginError.textContent = "Erreur : " + error.message;
     loginBtn.disabled = false;
     loginBtn.textContent = 'SE CONNECTER';
     return;
@@ -228,6 +246,52 @@ document.getElementById('exportBtn').addEventListener('click', () => {
   a.download = 'reveil-des-heros-2-participants.csv';
   a.click();
   URL.revokeObjectURL(url);
+});
+
+// --- envoi SMS groupé ---
+document.getElementById('sendSmsBtn').addEventListener('click', async () => {
+  const message = document.getElementById('smsMessage').value.trim();
+  const statusEl = document.getElementById('smsStatus');
+  const btn = document.getElementById('sendSmsBtn');
+
+  if (!message) {
+    statusEl.textContent = 'Écris un message avant d\'envoyer.';
+    return;
+  }
+  if (!confirm(`Envoyer ce SMS à ${allParticipants.length} participant(s) ? Cette action est irréversible.`)) {
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'ENVOI EN COURS...';
+  statusEl.textContent = 'Envoi en cours, merci de patienter...';
+
+  const { data: sessionData } = await supabaseClient.auth.getSession();
+  const accessToken = sessionData.session ? sessionData.session.access_token : null;
+  const mediaUrls = document.getElementById('smsMediaUrls').value
+    .split('\n')
+    .map(u => u.trim())
+    .filter(u => u.length > 0);
+
+  try {
+    const res = await fetch('/.netlify/functions/send-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message, accessToken, mediaUrls })
+    });
+    const result = await res.json();
+
+    if (!res.ok) {
+      statusEl.textContent = 'Erreur : ' + (result.error || 'échec de l\'envoi.');
+    } else {
+      statusEl.textContent = `${result.sent} SMS envoyés sur ${result.total} participant(s).`;
+    }
+  } catch (err) {
+    statusEl.textContent = 'Erreur réseau lors de l\'envoi.';
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Envoyer à tous les participants';
 });
 
 // si déjà connecté (session existante), sauter direct au dashboard
