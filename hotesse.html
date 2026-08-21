@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Inscription à l'entrée — Réveil des Héros II</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a120d; --surface:#101c14; --text:#f4efe5; --muted:#a7b2a4;
+  --gold:#3ecf7a; --line:rgba(255,255,255,.10);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;min-height:100vh}
+
+.login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+.login-card{width:100%;max-width:380px;background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:44px 34px;text-align:center}
+.login-card h1{font-family:"Cormorant Garamond",serif;font-size:26px;margin:0 0 8px}
+.login-card p{color:var(--muted);font-size:13.5px;margin:0 0 28px}
+.login-card input{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;margin-bottom:14px}
+.login-card input:focus{outline:none;border-color:var(--gold)}
+.login-card button{width:100%;border:0;border-radius:999px;padding:14px;background:var(--gold);color:#07160e;font-weight:700;letter-spacing:.05em;font-size:13px;cursor:pointer}
+.login-error{color:#e08a6a;font-size:13px;margin-top:14px;min-height:1em}
+
+.wrap{display:none;max-width:520px;margin:0 auto;padding:50px 24px 80px}
+.wrap.show{display:block}
+.wrap h1{font-family:"Cormorant Garamond",serif;font-size:30px;margin:0 0 6px;text-align:center}
+.wrap .sub{color:var(--muted);font-size:13.5px;text-align:center;margin:0 0 36px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:28px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.field input,.field select{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:15px;font-family:Inter,sans-serif}
+.field input:focus,.field select:focus{outline:none;border-color:var(--gold)}
+.phone-field{display:flex;gap:8px}
+.phone-field select{flex:0 0 92px}
+.phone-field input{flex:1;min-width:0}
+#hotesseOtherCode{margin-top:8px;display:none}
+
+.add-btn{width:100%;margin-top:10px;border:0;border-radius:999px;padding:16px;background:var(--gold);color:#07160e;font-weight:700;letter-spacing:.05em;font-size:14px;cursor:pointer}
+.add-btn:disabled{opacity:.6;cursor:default}
+.status{margin-top:16px;font-size:13.5px;text-align:center;min-height:1.2em}
+.status.ok{color:var(--gold)}
+.status.err{color:#e08a6a}
+
+.count{text-align:center;margin-top:24px;color:var(--muted);font-size:13px}
+.count strong{color:var(--gold);font-family:"Cormorant Garamond",serif;font-size:20px}
+</style>
+</head>
+<body>
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <h1>Accès hôtesses</h1>
+    <p>Réveil des Héros II — inscription à l'entrée</p>
+    <input type="password" id="hotessePassword" placeholder="Mot de passe" autocomplete="current-password" />
+    <button id="loginBtn">ENTRER</button>
+    <p id="loginError" class="login-error"></p>
+  </div>
+</div>
+
+<div id="wrap" class="wrap">
+  <h1>Inscription à l'entrée</h1>
+  <p class="sub">Pour les personnes qui ne peuvent pas scanner le code QR</p>
+
+  <div class="card">
+    <div class="field">
+      <label>Nom complet</label>
+      <input type="text" id="hName" placeholder="Nom et prénom" />
+    </div>
+    <div class="field">
+      <label>Téléphone</label>
+      <div class="phone-field">
+        <select id="hCountryCode">
+          <option value="+1">🇨🇦 +1</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+32">🇧🇪 +32</option>
+          <option value="+41">🇨🇭 +41</option>
+          <option value="+225">🇨🇮 +225</option>
+          <option value="+221">🇸🇳 +221</option>
+          <option value="+237">🇨🇲 +237</option>
+          <option value="+229">🇧🇯 +229</option>
+          <option value="+223">🇲🇱 +223</option>
+          <option value="+226">🇧🇫 +226</option>
+          <option value="+228">🇹🇬 +228</option>
+          <option value="+241">🇬🇦 +241</option>
+          <option value="+242">🇨🇬 +242</option>
+          <option value="+243">🇨🇩 +243</option>
+          <option value="+250">🇷🇼 +250</option>
+          <option value="+509">🇭🇹 +509</option>
+          <option value="other">🌍 Autre</option>
+        </select>
+        <input type="tel" id="hPhone" placeholder="Numéro" inputmode="numeric" />
+      </div>
+      <input type="text" id="hotesseOtherCode" placeholder="+indicatif" />
+    </div>
+    <div class="field">
+      <label>Courriel (optionnel)</label>
+      <input type="email" id="hEmail" placeholder="exemple@courriel.com" />
+    </div>
+    <button id="addBtn" class="add-btn">AJOUTER CETTE PERSONNE</button>
+    <p id="status" class="status"></p>
+  </div>
+
+  <p class="count"><strong id="sessionCount">0</strong> personne(s) ajoutée(s) depuis l'ouverture de cette page</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://fijmqryjryrxbuabxwpg.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_Xu3d9A1CP1xtftiUzHCLxg_NnAJ5pWI";
+const HOTESSE_PASSWORD = "Accueil"; 
+
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let sessionCount = 0;
+
+document.getElementById('loginBtn').addEventListener('click', () => {
+  const val = document.getElementById('hotessePassword').value;
+  const errEl = document.getElementById('loginError');
+  if (val === HOTESSE_PASSWORD) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('wrap').classList.add('show');
+  } else {
+    errEl.textContent = 'Mot de passe incorrect.';
+  }
+});
+document.getElementById('hotessePassword').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+
+document.getElementById('hCountryCode').addEventListener('change', (e) => {
+  document.getElementById('hotesseOtherCode').style.display = e.target.value === 'other' ? 'block' : 'none';
+});
+
+document.getElementById('addBtn').addEventListener('click', async () => {
+  const statusEl = document.getElementById('status');
+  const btn = document.getElementById('addBtn');
+  const nom = document.getElementById('hName').value.trim();
+  const codeSelect = document.getElementById('hCountryCode');
+  const otherCode = document.getElementById('hotesseOtherCode').value.trim().replace(/[^\d+]/g, '');
+  const code = codeSelect.value === 'other' ? (otherCode || '+') : codeSelect.value;
+  const phoneDigits = document.getElementById('hPhone').value.replace(/\D/g, '');
+  const email = document.getElementById('hEmail').value.trim();
+
+  statusEl.className = 'status';
+  statusEl.textContent = '';
+
+  if (!nom || !phoneDigits) {
+    statusEl.className = 'status err';
+    statusEl.textContent = 'Le nom et le téléphone sont obligatoires.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'AJOUT...';
+
+  const { error } = await supabaseClient.from('participants').insert([
+    { nom, telephone: code + phoneDigits, email: email || null, consentement: true }
+  ]);
+
+  if (error) {
+    statusEl.className = 'status err';
+    statusEl.textContent = error.code === '23505' ? 'Ce numéro est déjà inscrit.' : 'Erreur : ' + error.message;
+  } else {
+    statusEl.className = 'status ok';
+    statusEl.textContent = `✓ ${nom} a été ajouté(e).`;
+    sessionCount++;
+    document.getElementById('sessionCount').textContent = sessionCount;
+    document.getElementById('hName').value = '';
+    document.getElementById('hPhone').value = '';
+    document.getElementById('hEmail').value = '';
+    document.getElementById('hName').focus();
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'AJOUTER CETTE PERSONNE';
+});
+</script>
+</body>
+</html>
