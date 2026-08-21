@@ -59,6 +59,18 @@ td.muted{color:var(--muted)}
 .sms-panel textarea{width:100%;padding:14px 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:14px;font-family:Inter,sans-serif;resize:vertical;margin-bottom:14px}
 .sms-panel textarea:focus{outline:none;border-color:var(--gold)}
 .sms-status{margin-top:14px;font-size:13px;color:var(--muted)}
+
+.manual-panel{margin-bottom:24px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
+.manual-panel h2{font-family:"Cormorant Garamond",serif;font-size:20px;margin:0 0 6px}
+.manual-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.manual-row input,.manual-row select{padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:13.5px;font-family:Inter,sans-serif}
+.manual-row input:focus,.manual-row select:focus{outline:none;border-color:var(--gold)}
+.manual-row #manualName{flex:1 1 180px}
+.manual-row #manualCountryCode{flex:0 0 90px}
+.manual-row #manualOtherCode{flex:0 0 110px}
+.manual-row #manualPhone{flex:1 1 140px}
+.manual-row #manualEmail{flex:1 1 180px}
+.manual-row .export-btn{flex:0 0 auto;padding:12px 22px}
 </style>
 </head>
 <body>
@@ -92,6 +104,38 @@ td.muted{color:var(--muted)}
   <div class="toolbar">
     <input type="text" id="searchInput" placeholder="Rechercher un nom, téléphone ou courriel..." />
     <button class="export-btn" id="exportBtn">Exporter en CSV</button>
+  </div>
+
+  <div class="manual-panel">
+    <h2>Inscrire quelqu'un manuellement</h2>
+    <p class="sms-hint">Pour les personnes qui ne peuvent pas scanner le code QR (pas de téléphone, caméra qui ne fonctionne pas, etc.)</p>
+    <div class="manual-row">
+      <input type="text" id="manualName" placeholder="Nom complet *" />
+      <select id="manualCountryCode">
+        <option value="+1">🇨🇦 +1</option>
+        <option value="+33">🇫🇷 +33</option>
+        <option value="+32">🇧🇪 +32</option>
+        <option value="+41">🇨🇭 +41</option>
+        <option value="+225">🇨🇮 +225</option>
+        <option value="+221">🇸🇳 +221</option>
+        <option value="+237">🇨🇲 +237</option>
+        <option value="+229">🇧🇯 +229</option>
+        <option value="+223">🇲🇱 +223</option>
+        <option value="+226">🇧🇫 +226</option>
+        <option value="+228">🇹🇬 +228</option>
+        <option value="+241">🇬🇦 +241</option>
+        <option value="+242">🇨🇬 +242</option>
+        <option value="+243">🇨🇩 +243</option>
+        <option value="+250">🇷🇼 +250</option>
+        <option value="+509">🇭🇹 +509</option>
+        <option value="other">🌍 Autre</option>
+      </select>
+      <input type="text" id="manualOtherCode" placeholder="+indicatif" style="display:none" />
+      <input type="tel" id="manualPhone" placeholder="Numéro *" inputmode="numeric" />
+      <input type="email" id="manualEmail" placeholder="Courriel (optionnel)" />
+      <button id="manualAddBtn" class="export-btn">Ajouter</button>
+    </div>
+    <p id="manualStatus" class="sms-status"></p>
   </div>
 
   <div id="tableWrap">
@@ -292,6 +336,50 @@ document.getElementById('sendSmsBtn').addEventListener('click', async () => {
 
   btn.disabled = false;
   btn.textContent = 'Envoyer à tous les participants';
+});
+
+// --- inscription manuelle par les hôtesses ---
+document.getElementById('manualCountryCode').addEventListener('change', (e) => {
+  document.getElementById('manualOtherCode').style.display = e.target.value === 'other' ? 'inline-block' : 'none';
+});
+
+document.getElementById('manualAddBtn').addEventListener('click', async () => {
+  const statusEl = document.getElementById('manualStatus');
+  const btn = document.getElementById('manualAddBtn');
+  const nom = document.getElementById('manualName').value.trim();
+  const codeSelect = document.getElementById('manualCountryCode');
+  const otherCode = document.getElementById('manualOtherCode').value.trim().replace(/[^\d+]/g, '');
+  const code = codeSelect.value === 'other' ? (otherCode || '+') : codeSelect.value;
+  const phoneDigits = document.getElementById('manualPhone').value.replace(/\D/g, '');
+  const email = document.getElementById('manualEmail').value.trim();
+
+  if (!nom || !phoneDigits) {
+    statusEl.textContent = 'Le nom et le téléphone sont obligatoires.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'AJOUT...';
+  statusEl.textContent = '';
+
+  const { error } = await supabaseClient.from('participants').insert([
+    { nom, telephone: code + phoneDigits, email: email || null, consentement: true }
+  ]);
+
+  if (error) {
+    statusEl.textContent = error.code === '23505'
+      ? 'Ce numéro est déjà inscrit.'
+      : 'Erreur : ' + error.message;
+  } else {
+    statusEl.textContent = `${nom} a été ajouté(e) avec succès.`;
+    document.getElementById('manualName').value = '';
+    document.getElementById('manualPhone').value = '';
+    document.getElementById('manualEmail').value = '';
+    loadParticipants();
+  }
+
+  btn.disabled = false;
+  btn.textContent = 'Ajouter';
 });
 
 // si déjà connecté (session existante), sauter direct au dashboard

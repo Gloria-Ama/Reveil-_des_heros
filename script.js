@@ -39,7 +39,10 @@ setTimeout(() => launchConfetti(3000), 250);
     otherCodeInput.style.display = countrySelect.value === 'other' ? 'block' : 'none';
   });
   const successEl = document.getElementById('presenceSuccess');
-  const ALREADY_KEY = 'meta_reveil_heros_2_presence_ok';
+  // Change ce numéro de version juste avant le jour J (ex: v1 -> v2) pour forcer
+  // TOUT LE MONDE à revoir le pop-up d'inscription, même ceux qui ont déjà testé,
+  // sans que personne n'ait besoin de vider son navigateur manuellement.
+  const ALREADY_KEY = 'meta_reveil_heros_2_presence_ok_v1';
 
   function encode(data) {
     return Object.keys(data)
