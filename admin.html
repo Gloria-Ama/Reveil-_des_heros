@@ -318,17 +318,18 @@ document.getElementById('sendSmsBtn').addEventListener('click', async () => {
     .filter(u => u.length > 0);
 
   try {
-    const res = await fetch('/.netlify/functions/send-sms', {
+    const res = await fetch('/.netlify/functions/send-sms-background', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, accessToken, mediaUrls })
     });
-    const result = await res.json();
 
-    if (!res.ok) {
-      statusEl.textContent = 'Erreur : ' + (result.error || 'échec de l\'envoi.');
+    if (res.status === 202 || res.ok) {
+      statusEl.textContent = `Envoi lancé pour ${allParticipants.length} participant(s). Ça peut prendre quelques minutes selon le nombre — pas besoin de rester sur cette page. Vérifie les logs Twilio pour confirmer.`;
     } else {
-      statusEl.textContent = `${result.sent} SMS envoyés sur ${result.total} participant(s).`;
+      let result = {};
+      try { result = await res.json(); } catch (e) {}
+      statusEl.textContent = 'Erreur : ' + (result.error || 'échec de l\'envoi.');
     }
   } catch (err) {
     statusEl.textContent = 'Erreur réseau lors de l\'envoi.';
