@@ -14,12 +14,10 @@ const supabaseClient = (SUPABASE_URL.startsWith("http"))
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   : null;
 
-// Normalise un numéro de téléphone vers un format constant (10 chiffres, sans espaces/tirets)
-// pour que les doublons soient bien détectés peu importe comment la personne l'a tapé.
+// Le numéro arrive déjà au format international depuis le formulaire (ex: +18734558220),
+// on se contente ici de retirer tout espace résiduel pour garantir la cohérence.
 function normalizePhoneForStorage(raw) {
-  let digits = (raw || "").replace(/\D/g, "");
-  if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
-  return digits;
+  return (raw || "").replace(/\s+/g, "");
 }
 
 // Enregistre un participant. Retourne { ok: true } si succès,

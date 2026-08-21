@@ -30,7 +30,29 @@
         <input type="hidden" name="form-name" value="presence" />
         <div style="display:none"><input name="bot-field" /></div>
         <input type="text" id="presenceName" name="nom" data-i18n-placeholder="presence.name" placeholder="Nom complet *" required autocomplete="name" />
-        <input type="tel" id="presencePhone" name="telephone" data-i18n-placeholder="presence.phone" placeholder="Numéro de téléphone *" required autocomplete="tel" />
+        <div class="phone-row">
+          <select id="presenceCountryCode" aria-label="Indicatif du pays">
+            <option value="+1">🇨🇦 +1 (Canada/É.-U.)</option>
+            <option value="+33">🇫🇷 +33 (France)</option>
+            <option value="+32">🇧🇪 +32 (Belgique)</option>
+            <option value="+41">🇨🇭 +41 (Suisse)</option>
+            <option value="+225">🇨🇮 +225 (Côte d'Ivoire)</option>
+            <option value="+221">🇸🇳 +221 (Sénégal)</option>
+            <option value="+237">🇨🇲 +237 (Cameroun)</option>
+            <option value="+229">🇧🇯 +229 (Bénin)</option>
+            <option value="+223">🇲🇱 +223 (Mali)</option>
+            <option value="+226">🇧🇫 +226 (Burkina Faso)</option>
+            <option value="+228">🇹🇬 +228 (Togo)</option>
+            <option value="+241">🇬🇦 +241 (Gabon)</option>
+            <option value="+242">🇨🇬 +242 (Congo)</option>
+            <option value="+243">🇨🇩 +243 (RD Congo)</option>
+            <option value="+250">🇷🇼 +250 (Rwanda)</option>
+            <option value="+509">🇭🇹 +509 (Haïti)</option>
+            <option value="other">🌍 Autre</option>
+          </select>
+          <input type="tel" id="presencePhone" name="telephone" data-i18n-placeholder="presence.phone" placeholder="Numéro de téléphone *" required autocomplete="tel" inputmode="numeric" />
+        </div>
+        <input type="text" id="presenceOtherCode" placeholder="Indicatif (ex: +212)" style="display:none" />
         <input type="email" id="presenceEmail" name="courriel" data-i18n-placeholder="presence.email" placeholder="Adresse courriel — facultatif" autocomplete="email" />
         <button type="submit" id="presenceSubmit" data-i18n="presence.submit">ENTRER DANS L'EXPÉRIENCE →</button>
       </form>

@@ -10,12 +10,14 @@ const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN;
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER;
 const ADMIN_EMAIL = "draforamagloria@gmail.com";
 
-// Normalise un numéro vers le format international requis par Twilio (+1XXXXXXXXXX)
+// Normalise un numéro vers le format international requis par Twilio.
+// Les nouvelles inscriptions arrivent déjà en +indicatifNuméro (ex: +18734558220).
+// Ce filet de sécurité couvre les anciennes entrées qui n'avaient que 10 chiffres (Canada/É.-U.).
 function normalizePhone(raw) {
+  if (raw && raw.startsWith("+")) return raw;
   const digits = (raw || "").replace(/\D/g, "");
   if (digits.length === 10) return "+1" + digits;
   if (digits.length === 11 && digits.startsWith("1")) return "+" + digits;
-  if (raw && raw.startsWith("+")) return raw;
   return null; // format non reconnu, on l'ignore plutôt que de planter l'envoi
 }
 

@@ -32,6 +32,12 @@ setTimeout(() => launchConfetti(3000), 250);
   const form = document.getElementById('presenceForm');
   const submitBtn = document.getElementById('presenceSubmit');
   const errorEl = document.getElementById('presenceError');
+
+  const countrySelect = document.getElementById('presenceCountryCode');
+  const otherCodeInput = document.getElementById('presenceOtherCode');
+  countrySelect.addEventListener('change', () => {
+    otherCodeInput.style.display = countrySelect.value === 'other' ? 'block' : 'none';
+  });
   const successEl = document.getElementById('presenceSuccess');
   const ALREADY_KEY = 'meta_reveil_heros_2_presence_ok';
 
@@ -72,7 +78,11 @@ setTimeout(() => launchConfetti(3000), 250);
     submitBtn.textContent = (currentLang === 'en') ? 'SENDING...' : 'ENVOI...';
 
     const nom = document.getElementById('presenceName').value.trim();
-    const telephone = document.getElementById('presencePhone').value.trim();
+    const code = countrySelect.value === 'other'
+      ? (otherCodeInput.value.trim().replace(/[^\d+]/g, '') || '+')
+      : countrySelect.value;
+    const phoneDigits = document.getElementById('presencePhone').value.replace(/\D/g, '');
+    const telephone = code + phoneDigits;
     const courriel = document.getElementById('presenceEmail').value.trim();
     const firstName = nom.split(' ')[0] || nom;
 
